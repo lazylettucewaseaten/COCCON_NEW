@@ -197,11 +197,13 @@ policy constraint on the action space.
 
 Distribution-free control of the rate of intrusive replies (`src/conformal.py`, `src/calibrate.py`):
 - Nonconformity score per draft: s = 0.7 x Critic-predicted IP + 0.3 x grounding-violation mass.
-- A calibration set of rollouts on held-out calibration profiles gives the empirical risk R(lambda) of releasing
-  drafts with s <= lambda (risk = share of released turns with IP > tau = 0.20).
+- A calibration set of rollouts on held-out calibration profiles gives the empirical risk R(lambda): the share
+  of calibration turns that would be released at threshold lambda (s <= lambda) AND are intrusive (judge IP >
+  tau = 0.20), over all n calibration turns.
 - Upper confidence bounds on the risk: Hoeffding and Bentkus (the "HB" bound), at confidence 1 - delta, delta = 0.1.
 - lambda-hat = the largest threshold whose upper bound stays <= alpha. Guarantee: with probability >= 1 - delta
-  the intrusive rate among released turns is <= alpha, without assumptions on the model.
+  the rate of turns that are both released and intrusive is <= alpha, without assumptions on the model
+  (only that test turns are exchangeable with the calibration turns).
 
 Results: alpha 0.05 / 0.10 / 0.20 give lambda-hat 0 / 0.2 / 1.0 and release 13 / 73 / 100 %; with the gate
 (alpha 0.10) intrusive turns fell from 4.0 % to 2.3 %.
