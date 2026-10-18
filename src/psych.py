@@ -8,9 +8,15 @@ one, the DPO one, and the four-agent gated pipeline with the untuned (cell D) an
               every other metric) scores the reply on prompts/metric_syco.md - sycophancy (items 1-3: agrees with the
               distortion), balance (4-5: validates the feeling, not the belief), harshness (6-7) - and on IP. The
               question: does a less intrusive supporter become a more sycophantic one?
+  emobench    EmoBench (Sabour et al., ACL 2024; MIT; data/external/emobench), English half: 200 emotional-understanding scenarios
+              (which emotion, and why) and 200 emotional-application ones (the most effective response or action),
+              multiple choice. Each one-call model answers from its letter probabilities (no sampling), the steered
+              one with its steering on. The question: does fine-tuning, steering or DPO change measured emotional
+              intelligence?
 
     python src/psych.py respond --system base --backend transformers
     python src/psych.py score   --system base --backend ollama
+    python src/psych.py emobench --system base
     python src/psych.py report
 """
 from __future__ import annotations
@@ -134,8 +140,80 @@ def fmt_ci(vals: list[float], reps: int = 2000) -> str:
     return f"{st.mean(vals):.3f} [{boots[int(.025 * reps)]:.3f}, {boots[int(.975 * reps)]:.3f}]"
 
 
+def emo_items() -> list[dict]:
+    items = []
+    for r in read_jsonl(DATA / "external" / "emobench" / "EU.jsonl"):
+        if r.get("language", "en") != "en":
+            continue
+        base = {"qid": r["qid"], "category": r["coarse_category"], "scenario": r["scenario"]}
+        items.append({**base, "task": "EU_emotion", "choices": r["emotion_choices"], "label": r["emotion_label"],
+                      "question": f"What emotion would {r['subject']} ultimately feel in this situation?"})
+        items.append({**base, "task": "EU_cause", "choices": r["cause_choices"], "label": r["cause_label"],
+                      "question": f"Why would {r['subject']} feel {r['emotion_label'].lower()} in this situation?"})
+    for r in read_jsonl(DATA / "external" / "emobench" / "EA.jsonl"):
+        if r.get("language", "en") != "en":
+            continue
+        items.append({"qid": r["qid"], "category": r["category"], "scenario": r["scenario"], "task": "EA",
+                      "choices": r["choices"], "label": r["label"],
+                      "question": f"In this scenario, what is the most effective {r['question type'].lower()} "
+                                  f"for {r['subject']}?"})
+    return items
+
+
+def emobench(system: str, limit: int | None = None) -> None:
+    import contextlib
+
+    import torch
+
+    from llm import LLM
+
+    spec = SYSTEMS[system]
+    if spec["arch"] != "monolithic":
+        raise SystemExit("emobench tests a model, not a pipeline: use base, steered, sft or dpo")
+    if spec.get("adapter"):
+        load_config("models")["roles"]["supporter"]["adapter"] = spec["adapter"]
+    llm = LLM("supporter", backend="transformers")
+    model, tok = llm.backend.model, llm.backend.tokenizer
+    letters = "abcdef"
+    letter_ids = [tok.encode(c, add_special_tokens=False)[0] for c in letters]
+    rows = []
+    try:
+        steer = (llm.backend._steer(model, *spec["steer"]) if spec.get("steer") else contextlib.nullcontext())
+        with torch.no_grad(), steer:
+            for it in emo_items()[:limit]:
+                opts = "\n".join(f"({letters[i]}) {c}" for i, c in enumerate(it["choices"]))
+                prompt = (f"Scenario: {it['scenario']}\nQuestion: {it['question']}\nChoices:\n{opts}\n"
+                          f"Answer with the letter of the best choice only.")
+                text = tok.apply_chat_template([{"role": "user", "content": prompt}], tokenize=False,
+                                               add_generation_prompt=True, enable_thinking=False) + "("
+                enc = tok(text, return_tensors="pt").to(model.device)
+                logits = model(**enc).logits[0, -1]
+                pred = max(range(len(it["choices"])), key=lambda i: logits[letter_ids[i]].item())
+                rows.append({"system": system, "task": it["task"], "qid": it["qid"], "category": it["category"],
+                             "pred": it["choices"][pred], "label": it["label"],
+                             "correct": it["choices"][pred] == it["label"]})
+    finally:
+        model = None
+        llm.release()
+    write_jsonl(OUT / "emobench" / f"{system}.jsonl", rows)
+    print(f"{system}: accuracy {sum(r['correct'] for r in rows) / len(rows):.3f} on {len(rows)} items")
+
+
+def emo_table() -> list[str]:
+    lines = ["== EmoBench accuracy (letter probabilities; 95% CI over items; chance: emotion 1/6, cause and EA 1/4)",
+             "system  EU_emotion  EU_cause  EA  all"]
+    for name in SYSTEMS:
+        path = OUT / "emobench" / f"{name}.jsonl"
+        if not path.exists():
+            continue
+        rows = read_jsonl(path)
+        cells = [fmt_ci([float(r["correct"]) for r in rows if r["task"] == t]) for t in ("EU_emotion", "EU_cause", "EA")]
+        lines.append(f"{name}  " + "  ".join(cells) + f"  {fmt_ci([float(r['correct']) for r in rows])}")
+    return lines
+
+
 def report(dest: Path) -> None:
-    lines = [__doc__.split("\n\n")[0], ""] + syco_table()
+    lines = [__doc__.split("\n\n")[0], ""] + syco_table() + [""] + emo_table()
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "llm_psychology.txt").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
@@ -143,7 +221,7 @@ def report(dest: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="LLM psychology probes of the supporter systems.")
-    ap.add_argument("cmd", choices=["respond", "score", "report"])
+    ap.add_argument("cmd", choices=["respond", "score", "emobench", "report"])
     ap.add_argument("--system", choices=list(SYSTEMS))
     ap.add_argument("--backend", default=None)
     ap.add_argument("--limit", type=int, default=None, help="first N items only (smoke tests)")
@@ -153,6 +231,8 @@ def main() -> None:
         respond(args.system, args.backend or "transformers", args.limit)
     elif args.cmd == "score":
         score(args.system, args.backend)
+    elif args.cmd == "emobench":
+        emobench(args.system, args.limit)
     else:
         report(Path(args.out))
 
