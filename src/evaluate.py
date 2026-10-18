@@ -97,11 +97,12 @@ def run_session(pipeline, sim_view, profile: dict, session_id: str, session_inde
 def run_arm(arm_name: str, limit: int | None = None, backend: str | None = None,
             run_dir: Path | None = None, calibration_path: str | None = None,
             adapter: str | None = None, supporter_base: str | None = None, steer: str | None = None,
-            steer_vector: str = "runs/steering/steering_vectors.pt") -> dict:
+            steer_vector: str = "runs/steering/steering_vectors.pt", tag_suffix: str | None = None) -> dict:
     spec = resolve_arm(arm_name)
     # --steer LAYER:COEF (src/steering.py). Each setting writes its own file, <arm>_L<layer>_c<coef>, but keeps the
     # arm's session ids, so every setting (coef 0 = the unsteered control) meets the same people, gaps and turn counts.
-    steer_kw, tag = {}, arm_name
+    # --tag NAME does the same for two adapters on one arm (src/preference.py: SFT vs DPO): own file, same session ids.
+    steer_kw, tag = {}, (f"{arm_name}_{tag_suffix}" if tag_suffix else arm_name)
     if steer:
         layer, coef = steer.split(":")
         steer_kw = {"steer_vector": steer_vector, "steer_layer": int(layer), "steer_coef": float(coef)}
@@ -239,6 +240,7 @@ def main() -> None:
                          "keeps playing the seeker")
     ap.add_argument("--steer", default=None, help="LAYER:COEF activation steering of the reply (src/steering.py)")
     ap.add_argument("--steer-vector", default="runs/steering/steering_vectors.pt")
+    ap.add_argument("--tag", default=None, help="output name suffix, <arm>_<tag>; session ids stay the arm's")
     args = ap.parse_args()
 
     if args.list:
@@ -251,7 +253,7 @@ def main() -> None:
     run_dir = Path(args.run_dir) if args.run_dir else new_run_dir("eval")
     for name in names:
         s = run_arm(name, args.limit, args.backend, run_dir, args.calibration, args.adapter,
-                    args.supporter_base, args.steer, args.steer_vector)
+                    args.supporter_base, args.steer, args.steer_vector, args.tag)
         print(f"{name}: {s['sessions_written']} sessions -> {s['dialogues_path']}")
     print(f"run dir: {run_dir}")
 

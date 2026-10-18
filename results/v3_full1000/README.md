@@ -29,6 +29,7 @@ summaries and the folders' own files.
 | Outcome 4: ES-MemEval | memory QA on ES-MemEval | `memeval/` | `summaries/13_*` | done |
 | Outcome 4: fine-tuned 7B with and without memory | multi-session comparison of all 7B systems | `sft7b_multi/` | `summaries/07_*`, `11_*` | done |
 | Added, not in the SOP: activation steering vs our pipeline | cell A's one-call listener steered away from intrusive replies (contrastive activation addition), multi-session, against its unsteered control, cells A-D and step 12 | `steering/` (added when done) | `summaries/15_*` (added when done) | queued on the lab after step 12 (`scripts/steering.sh`) |
+| Added, not in the SOP: preference alignment (DPO) vs our pipeline | the fine-tuned one-call listener trained by DPO to prefer its less intrusive replies (pairs ranked by the base Qwen critic, not the evaluation judge), multi-session, against its SFT control, steering, cells A-D and step 12 | `preference/` (added when done) | `summaries/18_*` (added when done) | queued on the lab after the 12c rerun (`scripts/preference.sh`) |
 | Architecture figure | pipeline diagrams | `architecture_diagrams/` | `summaries/12_*` | done |
 | Reference: 50-profile run | v2 numbers | `../v2/` | `summaries/10_*` | done |
 | Appendix: substitutions | hardware and model substitutions with reasons | `reports_lab/substitutions.md` (empty template) | none | not written yet |

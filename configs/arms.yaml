@@ -30,6 +30,10 @@ arms:
   steer_calib:           {architecture: monolithic, gate: off, eval_set: calibration}
   steer_mono:            {architecture: monolithic, gate: off}
 
+  # Preference alignment (src/preference.py, scripts/preference.sh): the fine-tuned one-call listener, run with --adapter
+  # and --tag sft (SFT adapter) or --tag dpo (after DPO). Multi-session like cell A.
+  pref_mono:             {supporter: sft_with_thoughts, architecture: monolithic, gate: off}
+
   mem_none:             {supporter: base, architecture: decomposed, gate: off, memory: none,      multi_session: true, advance_profile: true, simulator: corrective}
   mem_summary:          {supporter: base, architecture: decomposed, gate: off, memory: summary,   multi_session: true, advance_profile: true, simulator: corrective}
   mem_dense:            {supporter: base, architecture: decomposed, gate: off, memory: dense,     multi_session: true, advance_profile: true, simulator: corrective}
