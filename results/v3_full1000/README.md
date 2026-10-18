@@ -5,14 +5,33 @@ fine-tuning runs, and the analyses run on top of them (GPU and CPU). Nothing her
 copied from `runs/` (which git ignores) by `scripts/collect_results.sh`, and refreshed by rerunning that
 script as each pending step finishes. Model weights are not included (too large for git).
 
-**Status on 7 October 2026, 14:20 IST.** Dataset: done. All six fine-tunes (0.5B / 3B / 7B x both arms): done.
-LoRA geometry and rank truncation: done for all sizes. PVI: done for all three sizes (the 7B rerun finished
-on the lab on 6 Oct 20:06). Test-profile evaluation (section 6): 0.5B and 7B, both arms, done. The 3B was
-not evaluated on test profiles (we chose to skip it). SOP evaluations on the lab RTX 3060:
-- **Our need-state memory (`mem_needstate`, section 8):** done, 6 Oct 20:06 to 7 Oct 02:28.
-- **Baselines and the 2 x 2 (section 7):** gate calibration, `base_instruct`, `reactive_baseline`, cell A
-  and cell B (judge scores) are done. Cell B's counterfactual PRI is running; cells C and D come next.
-- **Still queued:** the other memory arms and the memory metrics, ES-MemEval, and the alpha sweep (section 9).
+## Where each SOP item's results are (status 17 October 2026)
+
+`summaries/` holds the short written summaries, one folder per result, numbered as in `temp_results/`. The
+other folders hold the raw outputs: dialogues, judge scores, calibration files and plots. Sections 1-10 below
+are the detailed notes written up to 7 October. Results that came in after that are in this table, the
+summaries and the folders' own files.
+
+| SOP part | Result | Raw outputs | Summary | Status |
+|---|---|---|---|---|
+| Enhancement 1: data construction | 1000-profile multi-session corpus, statistics | `dataset/` | `summaries/01_*` | done |
+| Enhancement 1 / Section IV: data quality vs ExTES and ESConv | judge table; ESC-RANK column to be added | `dataset/data_quality*` | `summaries/01_*` | judge done; ESC-RANK running on 10.10.10.104 |
+| Section IV: fine-tuning an open model | QLoRA 0.5B / 3B / 7B, with and without thoughts | `training/`, `analyses/scaling/` | `summaries/02_*` | done |
+| Outcome 1: annotation ablation (with vs without thoughts) | PVI of the thoughts, LoRA geometry, test-profile scores | `analyses/pvi/`, `analyses/lora_geometry/`, `test_eval/` | `summaries/03_*`, `04_*`, `05_*`, `09_*` | done |
+| Outcome 1: beat reactive baselines on Success | base instruct and reactive baseline arms | `baselines_1000/` | `summaries/06_*` | done |
+| Section IV: ExTES as a second corpus | ExTES-trained 7B vs ours, on our people and on ExTES people; cell D on ExTES people | `corpus_extes/` (added when done) | added when done | ExTES adapter trained; 3 evaluations + `cellD_extes` running on 10.10.10.104 |
+| Enhancement 2 / Outcome 2: 2 x 2 decomposition x gate | cells A-D, conformal calibration, counterfactual PRI | `baselines_1000/` | `summaries/06_*` | done |
+| Enhancement 2: fine-tuned Generator in the four-agent pipeline (step 12) | 12a calibration (lambda_hat 0.425); 12b gated run with memory; 12c scores | `sft_agents/` | added when done | 12a done; 12b/12c running on the lab (10.50.28.201) |
+| Outcome 3: critic recovery vs cost curve | curves for the untuned and fine-tuned Generator | `analyses/gate_recovery_vs_cost/` | `summaries/14_*` | done |
+| Enhancement 3 / Outcome 3: IP, PRI, counterfactual PRI | per-turn judge scores for every arm | `scores/` inside each run folder | in each summary | done for finished arms |
+| Outcome 3: judge reliability check | judge vs human ratings | none | none | not done: needs human raters |
+| Enhancement 4 / Outcome 4: need-state memory vs baselines | none / flat summary / dense retrieval / need-state, untuned 7B, four agents | `memory_v2/`, `memory_1000/` | `summaries/08_*`, `13_*` | done (the event-level arm was dropped) |
+| Outcome 4: ES-MemEval | memory QA on ES-MemEval | `memeval/` | `summaries/13_*` | done |
+| Outcome 4: fine-tuned 7B with and without memory | multi-session comparison of all 7B systems | `sft7b_multi/` | `summaries/07_*`, `11_*` | done |
+| Added, not in the SOP: activation steering vs our pipeline | cell A's one-call listener steered away from intrusive replies (contrastive activation addition), multi-session, against its unsteered control, cells A-D and step 12 | `steering/` (added when done) | `summaries/15_*` (added when done) | queued on the lab after step 12 (`scripts/steering.sh`) |
+| Architecture figure | pipeline diagrams | `architecture_diagrams/` | `summaries/12_*` | done |
+| Reference: 50-profile run | v2 numbers | `../v2/` | `summaries/10_*` | done |
+| Appendix: substitutions | hardware and model substitutions with reasons | `reports_lab/substitutions.md` (empty template) | none | not written yet |
 
 | Folder | What | Where it ran |
 |---|---|---|

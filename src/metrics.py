@@ -1,15 +1,4 @@
-"""Enhancement 3 - turn-level psychological metrics (PLAN Sec. 11).
 
-IP scores a SUPPORTER turn for overstepping readiness. PRI scores the SEEKER's next turn for resistance
-aroused by the preceding supporter move; `counterfactual.py` supplies its attribution.
-
-The three validity controls are enforced here and in judge.py, not left to discipline:
-  1. the scripted resistance level is never in a judge prompt (judge.ALLOWED_INFO / NEVER_SHOWN);
-  2. the judge model must differ from the supporter and the simulator (judge.assert_judge_separate);
-  3. a stratified subsample goes to human raters (human_eval/) and its agreement travels with every number.
-
-  python src/metrics.py --dialogues runs/<id>/dialogues/arm.jsonl --scale ip --backend echo
-"""
 from __future__ import annotations
 
 import argparse

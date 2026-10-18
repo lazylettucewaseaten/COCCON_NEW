@@ -20,10 +20,15 @@ arms:
   cellD_dec_gated:      {architecture: decomposed, gate: conformal}
   cellD_extes:          {architecture: decomposed, gate: conformal, memory: none, eval_set: extes}
   calib_dec_ungated:    {architecture: decomposed, gate: off, eval_set: calibration}
+  # Step 12: cell D / its calibration with the fine-tuned supporter as Generator (run with --adapter;
+  # Analyzer, Strategist and Critic stay on the base weights). scripts/sft_agents.sh
+  sft_calib_dec_ungated: {architecture: decomposed, gate: off, eval_set: calibration}
+  sft_dec_gated_mem:     {architecture: decomposed, gate: conformal}
 
-  gate_alpha_005:       {gate: conformal, gate_alpha: 0.05}
-  gate_alpha_010:       {gate: conformal, gate_alpha: 0.10}
-  gate_alpha_020:       {gate: conformal, gate_alpha: 0.20}
+  # Activation steering (src/steering.py, scripts/steering.sh): cell A's one-call listener, run with --steer LAYER:COEF
+  # on the transformers backend (coef 0 = its unsteered control). Multi-session like cell A (need-state memory default).
+  steer_calib:           {architecture: monolithic, gate: off, eval_set: calibration}
+  steer_mono:            {architecture: monolithic, gate: off}
 
   mem_none:             {supporter: base, architecture: decomposed, gate: off, memory: none,      multi_session: true, advance_profile: true, simulator: corrective}
   mem_summary:          {supporter: base, architecture: decomposed, gate: off, memory: summary,   multi_session: true, advance_profile: true, simulator: corrective}
@@ -31,18 +36,12 @@ arms:
   mem_event:            {supporter: base, architecture: decomposed, gate: off, memory: event,     multi_session: true, advance_profile: true, simulator: corrective}
   
   mem_needstate:        {supporter: base, architecture: decomposed, gate: off, memory: needstate, multi_session: true, advance_profile: true, simulator: corrective}
-  sftmem_zero_shot:     {supporter: sft_with_thoughts,    architecture: monolithic, gate: off, memory: needstate, memory_writer: true, multi_session: true, advance_profile: true, simulator: corrective}
   sftmem_with_thoughts: {supporter: sftmem_with_thoughts, architecture: monolithic, gate: off, memory: needstate, memory_writer: true, multi_session: true, advance_profile: true, simulator: corrective}
   sftmem_wo_thoughts:   {supporter: sftmem_wo_thoughts,   architecture: monolithic, gate: off, memory: needstate, memory_writer: true, multi_session: true, advance_profile: true, simulator: corrective}
   sftmem_no_memory:     {supporter: sftmem_with_thoughts, architecture: monolithic, gate: off, memory: none,      multi_session: true, advance_profile: true, simulator: corrective}
 
-  corpus_ours:          {supporter: sft_with_thoughts, architecture: monolithic, gate: off, memory: none}
-  corpus_ours_wo:       {supporter: sft_wo_thoughts,   architecture: monolithic, gate: off, memory: none}
-  corpus_esconv:        {supporter: corpus_esconv,     architecture: monolithic, gate: off, memory: none}
   corpus_extes:         {supporter: corpus_extes,      architecture: monolithic, gate: off, memory: none}
-  corpus_smile:         {supporter: corpus_smile,      architecture: monolithic, gate: off, memory: none}
-  corpus_ours_extes_profiles:   {supporter: sft_with_thoughts, architecture: monolithic, gate: off, memory: none, eval_set: extes}
-  corpus_esconv_extes_profiles: {supporter: corpus_esconv,     architecture: monolithic, gate: off, memory: none, eval_set: extes}
+  corpus_ours_extes_profiles:   {supporter: sft_wo_thoughts,   architecture: monolithic, gate: off, memory: none, eval_set: extes}
   corpus_extes_extes_profiles:  {supporter: corpus_extes,      architecture: monolithic, gate: off, memory: none, eval_set: extes}
 
 adapters:
@@ -51,9 +50,7 @@ adapters:
   sft_wo_thoughts: null
   sftmem_with_thoughts: null    # Option C: runs/memcorpus/adapter_with_thoughts (scripts/memcorpus.sh passes --adapter)
   sftmem_wo_thoughts: null
-  corpus_esconv: null
   corpus_extes: null
-  corpus_smile: null
 
 eval_sets:
   own_heldout:  {path: data/profiles/profiles_test.jsonl,      in_distribution: true}

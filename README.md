@@ -85,7 +85,7 @@ wall clock, and the run ends with a timing summary.
 
 The ablations are arms, not bespoke scripts, so the runner covers them by iterating `configs/arms.yaml`:
 the annotation ablation (`sft_with_thoughts` vs `sft_wo_thoughts`), the 2x2 of decomposition x gate
-(`cellA`-`cellD`), the alpha sweep (a separate calibration is fitted per alpha), and the five memory arms
+(`cellA`-`cellD`, gate calibrated once at alpha 0.10), and the five memory arms
 on the internal and both external sets. `src/report.py` then writes `reports/results.md` with the per-arm
 table, the 2x2 main effects and interaction, the risk-coverage frontier, and paired-bootstrap CIs.
 
@@ -136,13 +136,13 @@ Their comparison fine-tunes one base model on each corpus and scores every resul
 profiles. That is reproduced here as arms, not as a bespoke script:
 
 ```
-python src/convert_corpus.py --set esconv --raw data/raw/esconv.json   # -> data/sft/corpus_esconv_*.jsonl
-python src/train.py --arm corpus_esconv --out runs/<id>                # one adapter per corpus
-# put the adapter paths into configs/arms.yaml -> adapters:
-python src/evaluate.py --arm corpus_esconv --arm corpus_ours --run-dir runs/<id>
+python src/convert_corpus.py --set extes --raw data/raw/extes.json     # -> data/sft/corpus_extes_*.jsonl
+python src/train.py --arm corpus_extes --out runs/<id>                 # the ExTES reactive baseline
+# put the adapter path into configs/arms.yaml -> adapters:
+python src/evaluate.py --arm corpus_extes --arm sft_with_thoughts --run-dir runs/<id>
 ```
 
-`--train` in `scripts/run_all.py` does the convert-and-train steps for every corpus whose raw file is
+`--train` in `scripts/run_all.py` does the convert-and-train steps for ExTES when its raw file is
 present. The report then prints a **Training-corpus comparison** table with the same columns as the paper:
 SR, Basic Avg (the six basic metrics rescaled to 0-100), and the four scale dimensions Aff / Neg / Sup / Man,
 for our profiles and for the ExTES profiles.

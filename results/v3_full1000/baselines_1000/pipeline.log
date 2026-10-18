@@ -94,3 +94,22 @@
 2026-10-09T03:10:43.575497+00:00        run dir: runs/baselines_1000
 2026-10-09T03:10:43.914398+00:00 OK   [eval] 20887.9s
 2026-10-09T03:10:44.004948+00:00 RUN  [score] metrics.py --dialogues runs/baselines_1000/dialogues/cellD_dec_gated.jsonl --backend ollama
+2026-10-09T04:21:35.002343+00:00        basic: n=310 mean=0.7801971326164874 failures=0 judge=mistralai/Mistral-Nemo-Instruct-2407
+2026-10-09T04:21:35.064236+00:00        ip: n=1240 mean=0.0722926267281106 failures=0 judge=mistralai/Mistral-Nemo-Instruct-2407
+2026-10-09T04:21:35.064432+00:00        pri: n=3063 mean=0.19405189434572392 failures=12 judge=mistralai/Mistral-Nemo-Instruct-2407
+2026-10-09T04:21:35.081973+00:00 OK   [score] 4251.0s
+2026-10-09T04:21:35.100300+00:00 RUN  [score] counterfactual.py --dialogues runs/baselines_1000/dialogues/cellD_dec_gated.jsonl --backend ollama
+2026-10-09T05:41:49.554319+00:00        PRI = -0.0037452101746481047 (95% CI -0.008443571524849328 .. 0.0010398012824215804) over 2473 seed-matched pairs on 1240 turns
+2026-10-09T05:41:49.729719+00:00 OK   [score] 4814.4s
+2026-10-09T05:41:49.799049+00:00 RUN  [report] report.py --run runs/baselines_1000
+2026-10-09T05:41:53.783309+00:00        wrote /home/cse/COCCON_FULL/reports/results.md
+2026-10-09T05:41:53.783505+00:00 OK   [report] 4.0s
+2026-10-09T05:41:53.825463+00:00 
+2026-10-09T05:41:53.825638+00:00 stage timings (seconds)
+2026-10-09T05:41:53.946149+00:00   calib      6631.3  (2 steps)
+2026-10-09T05:41:53.946264+00:00   eval      53810.7  (6 steps)
+2026-10-09T05:41:53.946291+00:00   score     42728.3  (12 steps)
+2026-10-09T05:41:53.946311+00:00   report        4.0  (1 steps)
+2026-10-09T05:41:54.001838+00:00 
+results: /home/cse/COCCON_FULL/reports/results.md
+2026-10-09T05:41:54.001974+00:00 run dir: runs/baselines_1000

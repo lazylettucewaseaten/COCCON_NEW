@@ -21,9 +21,9 @@ Six basic metrics on 0-100, CRS Aff / Neg and RAC Sup / Man on 1-7 (Neg lower is
 
 | Dataset | source | n | Flu | Div | Emp | Inf | Hum | Skil | Basic Avg | Aff | Neg ↓ | Sup | Man |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **ours (this corpus)** | ours | pending (lab, sop_queue2 step 0) | - | - | - | - | - | - | - | - | - | - | - |
-| ExTES | ours | pending (lab, sop_queue2 step 0) | - | - | - | - | - | - | - | - | - | - | - |
-| ESConv | ours | pending (lab, sop_queue2 step 0) | - | - | - | - | - | - | - | - | - | - | - |
+| **ours (this corpus)** | ours | 200 | 83.3 | 67.2 | 83.3 | 83.2 | 83.3 | 83.0 | 80.5 | 5.72 | 1.00 | 6.26 | 5.57 |
+| ExTES | ours | 100 | 83.3 | 73.2 | 84.2 | 83.3 | 83.3 | 83.3 | 81.8 | 5.98 | 1.00 | 6.74 | 6.07 |
+| ESConv | ours | 100 | 82.7 | 66.0 | 79.0 | 81.2 | 83.0 | 81.5 | 78.9 | 5.88 | 1.00 | 6.28 | 5.63 |
 | esconv | paper | - | 76.0 | 65.9 | 75.9 | 62.1 | 71.1 | 69.6 | 70.1 | 5.12 | 1.74 | 6.03 | 5.22 |
 | extes | paper | - | 91.8 | 81.3 | 92.5 | 81.1 | 89.2 | 90.3 | 87.7 | 5.56 | 1.48 | 6.79 | 6.03 |
 | COCOON | paper | - | 93.1 | 83.1 | 95.7 | 86.1 | 89.5 | 93.3 | 90.1 | 5.84 | 1.21 | 6.90 | 6.20 |
