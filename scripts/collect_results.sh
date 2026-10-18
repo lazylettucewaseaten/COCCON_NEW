@@ -42,7 +42,7 @@ for run in baselines_1000 memory_1000; do
         tar xf - -C "$D/$run"
 done
 # runs that came later; their memory_calibration folders are the real (Ollama judge) runs, so keep them
-for run in memory_v2 memeval sft7b_multi sft_agents corpus_extes steering preference; do
+for run in memory_v2 memeval sft7b_multi sft_agents corpus_extes steering preference psych; do
     [ -d runs/$run ] || continue
     mkdir -p "$D/$run"
     (cd runs/$run && tar cf - --exclude=calls.jsonl --exclude=pipeline_state.json .) | tar xf - -C "$D/$run"
