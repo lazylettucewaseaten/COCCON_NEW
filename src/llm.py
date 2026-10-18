@@ -453,6 +453,9 @@ class LLM:
             for attr in ("model", "tuned"):          # tuned: a second, smaller base (adapter_base)
                 if getattr(self.backend, attr, None) is not None:
                     delattr(self.backend, attr)
+            import gc
+
+            gc.collect()                             # module cycles keep the weights alive until collected
             torch.cuda.empty_cache()
         except Exception:
             pass
