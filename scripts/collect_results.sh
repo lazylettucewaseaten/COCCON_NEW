@@ -47,5 +47,6 @@ for run in memory_v2 memeval sft7b_multi sft_agents corpus_extes steering prefer
     mkdir -p "$D/$run"
     (cd runs/$run && tar cf - --exclude=calls.jsonl --exclude=pipeline_state.json .) | tar xf - -C "$D/$run"
 done
+[ -d runs/data_quality/escrank ] && cp -r runs/data_quality/escrank "$D/dataset/"
 mkdir -p "$D/summaries" && cp -r temp_results/[0-9]*/ "$D/summaries/"
 echo "collected into $D"

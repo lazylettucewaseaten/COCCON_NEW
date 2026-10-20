@@ -5,35 +5,54 @@ fine-tuning runs, and the analyses run on top of them (GPU and CPU). Nothing her
 copied from `runs/` (which git ignores) by `scripts/collect_results.sh`, and refreshed by rerunning that
 script as each pending step finishes. Model weights are not included (too large for git).
 
-## Where each SOP item's results are (status 17 October 2026)
+## Where each SOP item's results are (status 20 October 2026)
 
-`summaries/` holds the short written summaries, one folder per result, numbered as in `temp_results/`. The
-other folders hold the raw outputs: dialogues, judge scores, calibration files and plots. Sections 1-10 below
-are the detailed notes written up to 7 October. Results that came in after that are in this table, the
-summaries and the folders' own files.
+How to read this: each row is one thing the SOP (`modified_SOP_12340340_12340370.pdf`) promises, or one study added on
+top of it. "SOP section" says where the promise is made. The headline is the short answer; the summary folder has the
+full numbers and caveats; the raw folder has the dialogues, judge scores and other files the numbers come from.
+All raw folders are under `results/v3_full1000/`, all summaries under `results/v3_full1000/summaries/` (the same files
+as `temp_results/`). Judge scores are 0-1 (Mistral-Nemo-12B); IP = intrusiveness, PRI = resistance in the seeker's
+next turn, higher = worse for both; 95 % CIs bootstrap over people. "Holm" = survives the multiple-comparison
+correction in `summaries/23_multiple_comparisons`.
 
-| SOP part | Result | Raw outputs | Summary | Status |
-|---|---|---|---|---|
-| Enhancement 1: data construction | 1000-profile multi-session corpus, statistics | `dataset/` | `summaries/01_*` | done |
-| Enhancement 1 / Section IV: data quality vs ExTES and ESConv | judge table; ESC-RANK column to be added | `dataset/data_quality*` | `summaries/01_*` | judge done; ESC-RANK running on 10.10.10.104 |
-| Section IV: fine-tuning an open model | QLoRA 0.5B / 3B / 7B, with and without thoughts | `training/`, `analyses/scaling/` | `summaries/02_*` | done |
-| Outcome 1: annotation ablation (with vs without thoughts) | PVI of the thoughts, LoRA geometry, test-profile scores | `analyses/pvi/`, `analyses/lora_geometry/`, `test_eval/` | `summaries/03_*`, `04_*`, `05_*`, `09_*` | done |
-| Outcome 1: beat reactive baselines on Success | base instruct and reactive baseline arms | `baselines_1000/` | `summaries/06_*` | done |
-| Section IV: ExTES as a second corpus | ExTES-trained 7B vs ours, on our people and on ExTES people; cell D on ExTES people | `corpus_extes/` (added when done) | added when done | ExTES adapter trained; 3 evaluations + `cellD_extes` running on 10.10.10.104 |
-| Enhancement 2 / Outcome 2: 2 x 2 decomposition x gate | cells A-D, conformal calibration, counterfactual PRI | `baselines_1000/` | `summaries/06_*` | done |
-| Enhancement 2: fine-tuned Generator in the four-agent pipeline (step 12) | 12a calibration (lambda_hat 0.425); 12b gated run with memory; 12c scores | `sft_agents/` | added when done | 12a done; 12b/12c running on the lab (10.50.28.201) |
-| Outcome 3: critic recovery vs cost curve | curves for the untuned and fine-tuned Generator | `analyses/gate_recovery_vs_cost/` | `summaries/14_*` | done |
-| Enhancement 3 / Outcome 3: IP, PRI, counterfactual PRI | per-turn judge scores for every arm | `scores/` inside each run folder | in each summary | done for finished arms |
-| Outcome 3: judge reliability check | judge vs human ratings | none | none | not done: needs human raters |
-| Enhancement 4 / Outcome 4: need-state memory vs baselines | none / flat summary / dense retrieval / need-state, untuned 7B, four agents | `memory_v2/`, `memory_1000/` | `summaries/08_*`, `13_*` | done (the event-level arm was dropped) |
-| Outcome 4: ES-MemEval | memory QA on ES-MemEval | `memeval/` | `summaries/13_*` | done |
-| Outcome 4: fine-tuned 7B with and without memory | multi-session comparison of all 7B systems | `sft7b_multi/` | `summaries/07_*`, `11_*` | done |
-| Added, not in the SOP: activation steering vs our pipeline | cell A's one-call listener steered away from intrusive replies (contrastive activation addition), multi-session, against its unsteered control, cells A-D and step 12 | `steering/` (added when done) | `summaries/15_*` (added when done) | queued on the lab after step 12 (`scripts/steering.sh`) |
-| Added, not in the SOP: preference alignment (DPO) vs our pipeline | the fine-tuned one-call listener trained by DPO to prefer its less intrusive replies (pairs ranked by the base Qwen critic, not the evaluation judge), multi-session, against its SFT control, steering, cells A-D and step 12 | `preference/` (added when done) | `summaries/18_*` (added when done) | queued on the lab after the 12c rerun (`scripts/preference.sh`) |
-| Added, not in the SOP: LLM psychology probes | sycophancy on 48 thinking-trap / risky-plan probes, EmoBench emotional intelligence, and dependence vs outward support across sessions, for every supporter system (cell A, steered, SFT, DPO, cell D, step 12) | `psych/` (added when done) | `summaries/19_*` (added when done) | queued: 10.10.10.104 after the cellD_extes scoring (`scripts/psych_104.sh`), lab after DPO (`scripts/psych_lab.sh`) |
-| Architecture figure | pipeline diagrams | `architecture_diagrams/` | `summaries/12_*` | done |
-| Reference: 50-profile run | v2 numbers | `../v2/` | `summaries/10_*` | done |
-| Appendix: substitutions | hardware and model substitutions with reasons | `reports_lab/substitutions.md` (empty template) | none | not written yet |
+### Promised in the SOP
+
+| SOP section | What we did | Headline | Raw | Summary | Status |
+|---|---|---|---|---|---|
+| III-A Enhancement 1: data construction, profile seeding, multi-session time gaps | 1,000 EmpatheticDialogues-seeded profiles, 2,369 linked sessions with sampled gaps, 21,429 annotated supporter turns | the seeding route is EmpatheticDialogues (85.5 % of screened seeds passed the need-chain screen) | `dataset/` | `01_*` | done |
+| IV / Expected outcome 1: corpus quality vs ExTES and ESConv | Mistral judge scales and ESC-RANK (the paper's own scorer) on 200 / 100 / 100 dialogues | judge saturates (~83 for all); ESC-RANK: ours Div 64.9, Inf 56.9, Skil 65.1, below ExTES (74.0, 70.2, 74.0), above ESConv | `dataset/data_quality.md`, `dataset/escrank/` | `01_*` | done |
+| III-E: fine-tuning open models | QLoRA on Qwen2.5 0.5B / 3B / 7B, with and without the Analysis + Strategy thoughts | best validation loss falls with size (with thoughts 0.842 / 0.687 / 0.612 for 0.5B / 3B / 7B; loss ~ N^-0.11, without thoughts N^-0.19) | `training/`, `analyses/scaling/` | `02_*` | done |
+| Expected outcome 1: reproduce the annotation ablation | usable information (PVI) of the thoughts, LoRA geometry, test scores with vs without thoughts | the thoughts carry 8.9 / 7.4 / 3.3 bits per reply (0.5B / 3B / 7B); on the 7B they add Success +0.023 [0.000, 0.047], on the 0.5B they add IP +0.021 | `analyses/pvi/`, `analyses/lora_geometry/`, `test_eval/` | `03_*`, `04_*`, `05_*`, `09_*` | done |
+| Expected outcome 1: compare with reactive baselines | untuned listener with the proactive seeker vs with a reactive seeker | the proactive seeker lowers IP (-0.024, Holm) and Success (-0.032, not Holm) | `baselines_1000/` | `06_*`, `23_*` | done |
+| IV: ExTES as a second corpus (distribution shift) | 7B trained on ExTES (15k examples) vs on ours, tested on our people and on ExTES people | on our people the ExTES model is more intrusive (IP +0.026, Holm) with higher Success (+0.035, not Holm); on ExTES people higher Success (+0.063, Holm) | `corpus_extes/` | `16_*` | done |
+| III-B Enhancement 2 / Expected outcome 2: the 2 x 2 (decomposition x gate) | cells A-D on 100 test people, 2-4 sessions each | the gate lowers IP with four agents (D - C -0.015, Holm); decomposition raises IP (C - A +0.020, D - B +0.012, Holm); no Success differences | `baselines_1000/` | `06_*`, `23_*` | done |
+| III-B "Scope of the guarantee": violation rate in and out of distribution | share of turns released and intrusive (IP > 0.2) vs the budget alpha 0.10 | cell D 0.046; step 12 0.091 [0.074, 0.112]; cell D on ExTES people 0.022, but only because 65 % of its turns fall back | `baselines_1000/`, `sft_agents/` | `17_*` | done |
+| III-B: the fine-tuned Generator inside the gated pipeline (step 12) | 12a gate calibration (lambda_hat 0.425), 12b the gated run with need-state memory, 12c scoring | IP 0.096 vs cell D 0.072, but step 12 ran on transformers and the backend alone adds ~0.017 IP | `sft_agents/` | `20_*` | done |
+| Expected outcome 3: the critic's recovery-vs-cost curve | offline curves from the calibration drafts, untuned and fine-tuned Generator | untuned: cost 27 %, recovery 38 %; fine-tuned: cost 53 %, recovery 57 % - only weakly better than random stopping | `analyses/gate_recovery_vs_cost/` | `14_*` | done |
+| III-C Enhancement 3: IP, PRI and counterfactual PRI, with the three judge controls | per-turn judge scores for every arm; resistance level withheld from the judge; judge from another family than the generator | counterfactual PRI: cell C +0.010 [0.005, 0.015], cell D -0.004 (n.s.), step 12 +0.014 | `scores/` in every run folder | each summary; examples in `22_*` | done |
+| III-C control 3 / Expected outcome 3: judge-human agreement | - | - | `human_eval/` (sampler, forms, agreement script ready) | - | **not done: needs 2-3 human raters** |
+| Expected outcome 3: judge reliability (added check) | second judge (Llama-3.1-8B) rescoring IP / PRI / Success on 9 key arms | pending | `*/scores_judge2/` | `21_*` | running on 10.10.10.104 |
+| III-D Enhancement 4 / Expected outcome 4: need-state memory vs no memory, flat summary, dense retrieval | untuned 7B, four agents, 100 test people, 2-4 sessions | no Success differences; memory raises IP (need-state +0.017, dense +0.018, not Holm); transition recall unusable, no denials to test | `memory_v2/`, `memory_1000/` | `08_*`, `13_*` | done (event-level arm dropped by decision) |
+| Expected outcome 4: ES-MemEval | memory QA on ES-MemEval | need-state 0.619 | `memeval/` | `13_*` | done |
+| Expected outcome 4: fine-tuned 7B with and without memory | multi-session comparison of all 7B systems | with memory Success 0.394 vs 0.380 without (sessions 2-4 gain most), IP the same (0.092 vs 0.090); the fine-tuned 7B is more intrusive than the untuned one (0.09 vs 0.07) | `sft7b_multi/` | `07_*`, `11_*` | done |
+| III-D: memory on ExTES profiles | - | - | - | - | not run (decision) |
+| Appendix: substitutions with their rationale | - | - | `reports_lab/substitutions.md` (empty template) | - | not written yet |
+
+### Added on top of the SOP
+
+| Study | What we did | Headline | Raw | Summary | Status |
+|---|---|---|---|---|---|
+| Activation steering vs our pipeline | contrastive activation addition on cell A's one-call listener (layer 12, strength 0.2, chosen on calibration people), multi-session, vs its unsteered control | IP -0.008 [-0.013, -0.003] paired, Success unchanged; not Holm | `steering/` | `15_*` | done |
+| Preference alignment (DPO) vs our pipeline | DPO of the fine-tuned listener on 460 pairs ranked by the Qwen critic (not the evaluation judge), multi-session, vs its SFT control | pending | `preference/` | `18_*` | running on the lab |
+| LLM psychology: sycophancy | 48 thinking-trap and risky-plan probes, every system | no system turns sycophantic (0.16-0.18), except on risky plans: SFT 0.32, steered 0.24 vs base 0.17 | `psych/sycophancy/` | `19_*` | done (DPO row pending) |
+| LLM psychology: emotional intelligence (EmoBench) | 600 English EmoBench items, letter probabilities | base 0.637, steered 0.630, SFT 0.610 (CIs overlap) | `psych/emobench/` | `19_*` | done (DPO row pending) |
+| LLM psychology: dependence and boundaries | phrase counts over every turn; judge on whole sessions of 15 people per arm | cell D and need-state memory point the person outward less (0.44, 0.40 vs cell A 0.60) and leave less autonomy | `psych/dependence/` | `19_*` | done (step 12, SFT, DPO rows pending) |
+| Multiple comparisons | 39 headline contrasts, bootstrap p, Holm at 0.05 | 9 survive, incl. the backend effect (+0.017 IP) | - | `23_*` | done (DPO row pending) |
+| Cost per turn | model calls per turn from each pipeline's structure | cell A 1.0, cell B 3.3, cell D 5.4, step 12 4.3, steering 1.0 | - | `24_*` | done (DPO row pending) |
+| Qualitative examples | rule-selected cases: gate revisions, steering, risky plans, resistance, memory; note on Qwen drifting into Chinese (<= ~1 % of turns) | - | - | `22_*` | done |
+| Architecture figure | pipeline diagrams | - | `architecture_diagrams/` | `12_*` | done |
+| Reference: the 50-profile v2 run | v2 numbers | - | `../v2/` | `10_*` | done |
+
 
 | Folder | What | Where it ran |
 |---|---|---|
