@@ -10,7 +10,13 @@ free_gpu() { python -c "import sys; sys.path.insert(0, 'src'); from train import
 echo "queued $(date); waiting for the ESC-RANK fill"
 until [ -n "$NO_WAIT" ] || grep -q "escrank fill complete" runs/escrank_fill.log 2>/dev/null; do sleep 120; done
 echo "=== pull llama3.1:8b-instruct-q4_K_M $(date)"
-curl -s localhost:11434/api/pull -d '{"model": "llama3.1:8b-instruct-q4_K_M", "stream": false}'; echo
+# the registry connection on this machine drops now and then: retry, then give up loudly
+for i in $(seq 1 20); do
+    curl -s localhost:11434/api/tags | grep -q '"llama3.1:8b-instruct-q4_K_M"' && break
+    curl -s localhost:11434/api/pull -d '{"model": "llama3.1:8b-instruct-q4_K_M", "stream": false}'; echo
+    sleep 30
+done
+curl -s localhost:11434/api/tags | grep -q '"llama3.1:8b-instruct-q4_K_M"' || { echo "!!! llama3.1 not pulled, stopping $(date)"; exit 1; }
 free_gpu
 for a in runs/baselines_1000:cellA_mono_ungated runs/baselines_1000:cellB_mono_gated runs/baselines_1000:cellC_dec_ungated \
          runs/baselines_1000:cellD_dec_gated runs/memory_v2:mem_none runs/memory_v2:mem_needstate \
