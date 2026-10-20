@@ -1,0 +1,17 @@
+Training corpus x test people: untuned Qwen2.5-7B fine-tuned (QLoRA, reply-only targets) on our corpus or on
+ExTES sampled to 15k examples; one session per person, 100 people per cell, monolithic, no gate, no memory.
+Judge Mistral-Nemo-12B; 95% CIs bootstrap over people. Cells use different seeds, so differences are unpaired.
+
+corpus  people        sessions  IP     PRI    Success  counterfactual PRI
+ours    our people         100  0.083  0.223  0.392    +0.0102 [+0.0006, +0.0198]
+ExTES   our people         100  0.109  0.262  0.427    +0.0164 [+0.0082, +0.0248]
+ours    ExTES people       100  0.108  0.320  0.453    +0.0438 [+0.0344, +0.0533]
+ExTES   ExTES people       100  0.109  0.294  0.517    +0.0370 [+0.0282, +0.0460]
+
+ExTES-trained minus ours-trained, same people (b - a)
+   our people   ip       +0.026 [+0.013, +0.040]
+   our people   pri      +0.038 [-0.002, +0.078]
+   our people   success  +0.035 [+0.002, +0.070]
+   ExTES people ip       +0.001 [-0.013, +0.015]
+   ExTES people pri      -0.026 [-0.064, +0.010]
+   ExTES people success  +0.063 [+0.030, +0.098]
