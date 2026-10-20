@@ -70,9 +70,33 @@
     }
   },
   "table6": {
-    "ours": null,
-    "extes": null,
-    "esconv": null
+    "ours": {
+      "fluency": 75.0,
+      "diversity": 64.875,
+      "empathy": 75.0,
+      "information": 56.875,
+      "humanoid": 49.875,
+      "skillfulness": 65.125,
+      "n": 200
+    },
+    "extes": {
+      "fluency": 75.0,
+      "diversity": 74.0,
+      "empathy": 75.0,
+      "information": 70.25,
+      "humanoid": 49.25,
+      "skillfulness": 74.0,
+      "n": 100
+    },
+    "esconv": {
+      "fluency": 71.0,
+      "diversity": 54.75,
+      "empathy": 74.75,
+      "information": 54.50000000000001,
+      "humanoid": 50.24999999999999,
+      "skillfulness": 67.5,
+      "n": 100
+    }
   },
   "paper": {
     "table2": {

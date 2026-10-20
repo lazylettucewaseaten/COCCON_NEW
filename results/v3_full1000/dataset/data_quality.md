@@ -30,13 +30,13 @@ Six basic metrics on 0-100, CRS Aff / Neg and RAC Sup / Man on 1-7 (Neg lower is
 
 ## Dialogue quality, ESC-RANK (paper Table 6)
 
-ESC-RANK scores each dialogue 0-4 per dimension; shown x 25 as in the paper (its ceiling 75 = every dialogue at 3). Same scorer as the paper, so these rows would be the most directly comparable. Not run on 7 Oct: ESC-RANK's InternLM2 code needs an older transformers than the lab's Python 3.13 installs from wheels, and the 15 GB RAM server could not build it alongside the running jobs (`scripts/escrank_score.py`, ESCRANK_ENABLE=1).
+ESC-RANK scores each dialogue 0-4 per dimension; shown x 25 as in the paper (its ceiling 75 = every dialogue at 3). Same scorer as the paper, so these rows are the most directly comparable. Run 18-20 Oct on 10.10.10.104 (`scripts/escrank_score.py` in its own venv: transformers 4.41, sentencepiece 0.2.0, protobuf); Inf answers longer than the 8-token budget were re-asked with 16 tokens (`--fill-missing`). Hum sits near 50 for all three corpora, far below the paper's ExTES / COCOON rows.
 
 | Dataset | source | n | Flu | Div | Emp | Inf | Hum | Skil |
 |---|---|---|---|---|---|---|---|---|
-| **ours (this corpus)** | ours | not run (see note) | - | - | - | - | - | - |
-| ExTES | ours | not run (see note) | - | - | - | - | - | - |
-| ESConv | ours | not run (see note) | - | - | - | - | - | - |
+| **ours (this corpus)** | ours | 200 | 75.0 | 64.9 | 75.0 | 56.9 | 49.9 | 65.1 |
+| ExTES | ours | 100 | 75.0 | 74.0 | 75.0 | 70.2 | 49.2 | 74.0 |
+| ESConv | ours | 100 | 71.0 | 54.8 | 74.8 | 54.5 | 50.2 | 67.5 |
 | esconv | paper | - | 72.3 | 55.8 | 74.0 | 56.5 | 50.8 | 69.5 |
 | extes | paper | - | 75.0 | 75.0 | 75.0 | 75.0 | 70.3 | 74.8 |
 | COCOON | paper | - | 75.0 | 75.0 | 75.0 | 75.0 | 75.0 | 75.0 |
