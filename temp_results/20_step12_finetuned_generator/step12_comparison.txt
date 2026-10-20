@@ -1,6 +1,13 @@
 Step 12: the fine-tuned Generator inside the four-agent gated pipeline, against cell D (same pipeline, untuned
 Generator) and the fine-tuned one-call model with memory (sft7b_multi_mem). 100 test people, 2-4 sessions each.
 By-person bootstrap 95% CIs; the arms use different session seeds, so differences are unpaired.
+BACKEND CAVEAT: step 12 ran on transformers (nf4), cells C and D on Ollama (Q4 GGUF). The backend alone moves IP: the
+untuned one-call listener scores 0.085 on transformers (steer_mono_L12_c0) against 0.068 on Ollama (cell A), +0.017.
+So most of step 12's IP gap to cell D may be the backend, not the fine-tuned Generator; no untuned four-agent gated arm
+was run on transformers to separate the two.
+
+    python scripts/step12_compare.py --out temp_results/20_step12_finetuned_generator
+
 
 arm  sessions  IP  PRI  Success  counterfactual PRI [95% CI]  fallback  words
 sft_dec_gated_mem  310  0.096  0.244  0.380  +0.0144 [+0.0108, +0.0182]  0.016  26.852
