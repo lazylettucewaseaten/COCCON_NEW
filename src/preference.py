@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 
 from build_sft import parse_target
-from common import DATA, ROOT, append_jsonl, existing_ids, fill, normalize_scale, read_jsonl, read_prompt, write_json
+from common import DATA, ROOT, append_jsonl, existing_ids, read_jsonl, write_json
 
 SFT = "runs/full_1000/adapter_with_thoughts"
 K = 4
@@ -78,24 +78,27 @@ def sample(out: Path, n: int, seed: int, adapter: str) -> None:
         llm.release()
 
 
-def ip_prompt(context: str, reply: str) -> str:
+def transcript(context: str, reply: str) -> str:
     convo = context.split("Conversation so far:\n", 1)[-1].split("\n\nWrite the supporter's next turn.")[0]
-    return fill(read_prompt("metric_ip.md"), info="(withheld)", diag=f"{convo}\nsupporter: {reply}", target=reply)
+    return f"{convo}\nsupporter: {reply}"
 
 
 def rank(out: Path, backend: str | None) -> None:
-    from judge import expected_items, parse_scores
+    from judge import Judge
     from llm import LLM, pmap
 
-    items = expected_items("ip")
     rows = read_jsonl(out / "candidates.jsonl")
     llm = LLM("critic", backend=backend)
+    # The judge's scoring routine (its prompt, parser, and the re-ask when items are missing - the 7B critic often
+    # answers item 1 only), run on the critic model rather than the evaluation judge.
+    ranker = Judge(llm=llm)
 
     def score(row: dict) -> dict:
         ips = []
-        for reply in row["responses"]:
-            parsed = parse_scores(llm.chat(ip_prompt(row["input"], reply), temperature=0.0), items) if reply else None
-            ips.append(normalize_scale(sum(parsed.values()) / len(parsed)) if parsed else None)
+        for i, reply in enumerate(row["responses"]):
+            res = ranker.score("ip", f"{row['id']}~{i}", transcript(row["input"], reply), {}, target_text=reply) \
+                if reply else None
+            ips.append(res.normalized if res and not res.parse_failed else None)
         return {**row, "ip": ips}
 
     try:
@@ -143,6 +146,8 @@ def train(out: Path, adapter: str, beta: float, lr: float, seed: int) -> None:
         print(f"{dest} exists, kept")
         return
     pairs = read_jsonl(out / "pairs.jsonl")
+    if len(pairs) < 20:
+        raise SystemExit(f"only {len(pairs)} preference pairs in {out / 'pairs.jsonl'}: check pairs_stats.json")
     random.Random(seed).shuffle(pairs)
     n_val = max(1, len(pairs) // 20)
     val, tr = pairs[:n_val], pairs[n_val:]
