@@ -88,14 +88,16 @@ def main() -> None:
             tau = kendall([means[(scale, x)][0] for x in arms], [means[(scale, x)][1] for x in arms])
             lines += [f"pooled: {len(all_a)} items, Spearman rho {spearman(all_a, all_b):.3f}; "
                       f"arm ranking Kendall tau {tau:.3f} over {len(arms)} arms", ""]
-    lines += ["== key contrasts: difference under each judge (same sign = the conclusion does not hang on the judge)",
-              "contrast  scale  Mistral  Llama  same sign"]
+    lines += ["== key contrasts: difference under each judge (same sign = the conclusion does not hang on the judge;",
+              "   'near 0' = one of the two differences is under 0.005, too small to have a sign)",
+              "contrast  scale  Mistral  Llama  agree"]
     for label, b, a in CONTRASTS:
         for scale in ("ip", "pri", "success"):
             if (scale, a) in means and (scale, b) in means:
                 dm = means[(scale, b)][0] - means[(scale, a)][0]
                 dl = means[(scale, b)][1] - means[(scale, a)][1]
-                lines.append(f"{label}  {scale}  {dm:+.3f}  {dl:+.3f}  {'yes' if dm * dl > 0 else 'NO'}")
+                agree = "near 0" if min(abs(dm), abs(dl)) < 0.005 else ("yes" if dm * dl > 0 else "NO")
+                lines.append(f"{label}  {scale}  {dm:+.3f}  {dl:+.3f}  {agree}")
     out.mkdir(parents=True, exist_ok=True)
     (out / "judge_agreement.txt").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
