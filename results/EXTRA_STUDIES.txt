@@ -60,7 +60,10 @@ E4. Sycophancy
             self-labeling, self-blame, all-or-nothing, feeling-as-fact, risky plans such as stopping medication);
             every system replies once; the judge scores sycophancy (agrees with the distortion), balance (validates
             the feeling, not the belief) and harshness, plus IP.
-   Result:  @@SYCO@@
+   Result:  no system turns sycophantic: sycophancy 0.16-0.19 for every system (base 0.170, steered 0.174, SFT 0.179,
+            DPO 0.188, cell D 0.163, step 12 0.171), balance ~0.88-0.90, no harshness. The exception is risky
+            plans (e.g. skipping meals, stopping medication): SFT 0.32 and steered 0.24 go along with them more
+            than base 0.17. Lower intrusiveness did not buy more agreement with distorted beliefs.
    Where:   R/psych/sycophancy/  ·  S/19_llm_psychology/  ·  data/psych/sycophancy_probes.jsonl,
             prompts/metric_syco.md, code src/psych.py
 
@@ -78,7 +81,11 @@ E6. Dependence and boundaries
    Done:    phrase counts over every generated supporter turn (the gate's fallback template, which says "I'm here",
             excluded), and the judge on whole sessions of the first 15 test people of each arm (reliance, outward
             support, autonomy).
-   Result:  @@DEP@@
+   Result:  reliance on the supporter is the same everywhere (~0.26-0.30, no drift from session 1 to 3+). What
+            differs is pointing outward: cell D 0.44 and need-state memory 0.40 vs cell A 0.60, with less autonomy
+            too (0.72, 0.69 vs 0.86) - the four-agent and memory systems keep the conversation on the supporter.
+            Steering, SFT and DPO stay close to cell A (outward 0.56-0.59). Mentions of friends, family or
+            professionals are rare in every arm (< 2 % of turns).
    Where:   R/psych/dependence/  ·  S/19_*  ·  prompts/metric_dependence.md
 
 
@@ -93,16 +100,21 @@ E7. Second judge and the judge's serving machine
    Result:  (a) every IP conclusion keeps its sign under Llama (gate, decomposition, steering, step 12) except the
             need-state memory IP rise, which Llama does not reproduce; per-item agreement rho: IP 0.36, PRI 0.63,
             Success 0.20 (Llama's Success sits near the floor, so it cannot check Success).
-            (b) @@MACHINE@@
+            (b) the serving machine matters. Same items, same weights: session-level scales shift a lot (cell A
+            reliance 0.08 on the lab vs 0.27 on 10.10.10.104; base-model sycophancy 0.02 vs 0.17), and turn-level
+            IP shifts a little (cell A 0.068 lab vs 0.079 on 10.10.10.104, item rho 0.66; the lab against itself
+            two weeks apart: 0.071, rho 0.90). So all psychology probes were re-judged on 10.10.10.104, and the
+            one headline IP comparison that mixed machines (ExTES vs ours on our people) was re-judged on one
+            machine (S/16).
    Where:   R/*/scores_judge2/  ·  S/21_judge_judge_agreement/  ·  S/25_judge_machine_check/
             ·  code scripts/judge_agreement.py, scripts/judge_machine_check.py, --judge-role in src/metrics.py
 
 E8. Multiple-comparison correction
    Why:     dozens of confidence intervals are reported; some would look significant by chance.
    Done:    42 headline contrasts, bootstrap p over people (paired where arms share seeds), Holm at 0.05.
-   Result:  10 survive: gate with four agents (IP), decomposition (IP, twice), proactive vs reactive seeker (IP),
-            step 12 vs cell D (IP, PRI), the transformers-vs-Ollama backend check (IP), ExTES-trained vs ours (IP on
-            our people, Success on ExTES people), DPO vs SFT (IP).
+   Result:  9 survive: gate with four agents (IP), decomposition (IP, twice), proactive vs reactive seeker (IP),
+            step 12 vs cell D (IP, PRI), the transformers-vs-Ollama backend check (IP), ExTES-trained vs ours
+            (Success on ExTES people), DPO vs SFT (IP).
    Where:   S/23_multiple_comparisons/  ·  code scripts/multiple_comparisons.py
 
 E9. Backend check

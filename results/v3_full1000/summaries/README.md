@@ -29,3 +29,4 @@ in `../README.md` ("Where each SOP item's results are") says which SOP section e
 | `22_qualitative_examples` | Enhancements 2-4 | rule-selected examples |
 | `23_multiple_comparisons` | all | Holm-corrected headline contrasts |
 | `24_cost_per_turn` | Expected outcome 3 (added) | model calls per turn vs IP bought |
+| `25_judge_machine_check` | Expected outcome 3 (added check) | the same judge on two machines: how far the scores move |

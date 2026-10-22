@@ -63,9 +63,10 @@ Status on 23 October 2026.
    Done:    (a) the untuned listener with our proactive seeker vs with a reactive seeker; (b) our-corpus model vs
             the ExTES-trained model (the strongest reactive baseline), on our people and on ExTES people.
    Result:  NOT beaten. (a) the proactive seeker lowers IP (-0.024, Holm) and Success (-0.032, not Holm).
-            (b) on our people the ExTES model has higher Success (+0.035, not Holm) and is more intrusive (IP
-            +0.026, Holm); on ExTES people it has higher Success (+0.063, Holm), same IP. The two cells on our people
-            were judged on different machines (see 13).
+            (b) on our people the ExTES model has higher Success (+0.037 [-0.002, +0.073], not significant) and
+            the same IP (+0.004, n.s.); on ExTES people it has higher Success (+0.063, Holm), same IP. All four cells
+            judged on one machine (our-people cell re-judged; the first, cross-machine version showed a spurious
+            IP +0.026).
    Where:   R/baselines_1000/ (base_instruct, reactive_baseline)  ·  R/corpus_extes/  ·  S/06_*, S/16_*, S/23_*
    Status:  done
 
@@ -193,8 +194,11 @@ NOT DONE (all of it, in one place)
 
 KNOWN LIMITATIONS TO STATE IN THE REPORT
   - Backend confound: transformers vs Ollama moves IP by +0.017 (step 12 vs cell D is affected).
-  - Judge serving machine: session-level scales (dependence, sycophancy) differ between the two Ollama versions;
-    all psychology probes were re-judged on one machine. Turn-level IP: see S/25_judge_machine_check.
+  - Judge serving machine: the same Mistral weights on Ollama 0.35 (lab) vs 0.18 (10.10.10.104) shift session-level
+    scales a lot and turn-level IP a little (cell A 0.068 vs 0.079). Compare arms judged on the same machine: the
+    psychology probes were all re-judged on 10.10.10.104 and the ExTES-vs-ours cell on our people re-judged there
+    too; memory arms and ExTES cells were judged on 10.10.10.104, the 2 x 2, step 12, steering and DPO on the lab
+    (S/25_judge_machine_check).
   - Most arms are unpaired (session seeds include the arm name); steering and DPO comparisons are paired.
   - The gate is safe out of distribution only by falling back on 65 % of turns; step 12's violation bound passes
     alpha.

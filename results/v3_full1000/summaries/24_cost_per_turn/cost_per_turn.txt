@@ -8,7 +8,7 @@ cell D: four agents + gate | 5.36 (8) | 21.7 | 0.072 | 0.369 | cell A | -0.005 |
 step 12: four agents + gate, fine-tuned Generator | 4.32 (8) | 26.9 | 0.096 | 0.380 | cell A | -0.028 | +3.32 | -0.0086
 steering control: one call (transformers) | 1.00 (1) | 31.8 | 0.085 | 0.405
 steering: one call + vector | 1.00 (1) | 27.5 | 0.076 | 0.404 | steering control | +0.008 | +0.00 | no extra call
-SFT control: fine-tuned one call | not run yet
-DPO: fine-tuned one call after DPO | not run yet
+SFT control: fine-tuned one call | 1.00 (1) | 28.0 | 0.088 | 0.377
+DPO: fine-tuned one call after DPO | 1.00 (1) | 23.2 | 0.061 | 0.387 | SFT control | +0.027 | +0.00 | no extra call
 
 IP drop > 0 means less intrusive than the baseline. Cells A-D ran on Ollama, with cell A as their baseline. Step 12, steering and DPO ran on transformers: steering and DPO are compared with their own controls; step 12 with cell A, so its row mixes the backend change with the fine-tuned Generator.
