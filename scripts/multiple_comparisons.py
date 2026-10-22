@@ -33,7 +33,7 @@ CONTRASTS = [
     ("Backend check", "transformers vs Ollama, untuned one call: steering control - cell A",
      ("runs/steering", "steer_mono_L12_c0"), (B, "cellA_mono_ungated"), False),
     ("Section IV (ExTES)", "ExTES- vs ours-trained, our people",
-     ("runs/corpus_extes", "corpus_extes"), ("runs/scaling_eval/qwen2.5_7B", "sft_wo_thoughts"), False),
+     ("runs/corpus_extes", "corpus_extes"), ("runs/scaling_eval_104/qwen2.5_7B", "sft_wo_thoughts"), False),
     ("Section IV (ExTES)", "ExTES- vs ours-trained, ExTES people",
      ("runs/corpus_extes", "corpus_extes_extes_profiles"), ("runs/corpus_extes", "corpus_ours_extes_profiles"), False),
     ("Added: steering", "steering: c0.2 - c0", ("runs/steering", "steer_mono_L12_c0.2"), ("runs/steering", "steer_mono_L12_c0"), True),
