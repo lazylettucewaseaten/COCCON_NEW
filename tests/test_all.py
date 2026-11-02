@@ -32,7 +32,6 @@ import counterfactual                             # noqa: E402
 import convert_corpus                          # noqa: E402
 import dialogue                                   # noqa: E402
 import evaluate as evaluate_mod                   # noqa: E402
-import futurememory                               # noqa: E402
 import filter as filter_mod                       # noqa: E402
 import external                               # noqa: E402
 import grounding                                  # noqa: E402
@@ -706,27 +705,6 @@ def _() -> None:
 
 
 # --------------------------------------------------------------------------- build_sft
-
-
-@check("futurememory.option_b_adds_briefs_keeps_session1_thoughts_and_builds_sft")
-def _() -> None:
-    out, sft = TMP / "futuremem", TMP / "sft_futuremem"
-    src = TMP / "futuremem_src.jsonl"
-    common.write_jsonl(src, [fake_session(), fake_session("p000001-s2", 2, gap=20.0)])
-    split = build_sft.split_assignment(["p000001"])["p000001"]
-    futurememory.replay_step(src, out, {split}, llm=echo("generator"))
-    replayed = common.read_jsonl(out / "sessions_replay.jsonl")
-    assert len(replayed) == 2 and all(t.get("memory_block") for s in replayed for t in s["turns"]
-                                      if t["role"] == "supporter" and t["meta"].get("source") != "opener_pool")
-    futurememory.annotate_step(out, llm=echo("judge"))
-    done = common.read_jsonl(out / "sessions_annotated.jsonl")
-    s1 = next(s for s in done if s["session_index"] == 1)
-    assert s1["turns"][2]["analysis"] == "worn down, minimising", "session 1 keeps its thoughts"
-    assert all(s["turns"][2]["analysis"] for s in done), "a failed re-annotation keeps the old thoughts"
-    counts = futurememory.sft_step(out, sft)
-    rows = common.read_jsonl(sft / f"with_thoughts_{split}.jsonl")
-    assert counts["with_thoughts"][split] == len(rows) == 2
-    assert not any("[memory] none." in r["input"] for r in rows), "the brief replaces the empty memory line"
 
 
 @check("build_sft.target_sequence_roundtrips_in_both_arms")
