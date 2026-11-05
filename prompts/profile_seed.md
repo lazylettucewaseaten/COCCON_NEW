@@ -1,4 +1,4 @@
-Build the hidden psychological profile of one person for an emotional-support simulation, from the
+xBuild the hidden psychological profile of one person for an emotional-support simulation, from the
 situation below. The point is that the surface feeling is visible and the underlying need is NOT.
 
 Situation: {situation_text}

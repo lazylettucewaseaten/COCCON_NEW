@@ -1,15 +1,4 @@
-"""Enhancement 3 - counterfactual attribution for PRI (PLAN Sec. 11.3).
 
-Each supporter turn is treated as an intervention:
-  factual  : keep the turn, re-generate the seeker's reply N times
-  control  : replace it with a NEUTRAL REFLECTIVE control turn, re-generate N times with the SAME seeds
-  PRI      : mean(r_factual) - mean(r_control), with a paired bootstrap CI over the seed-matched pairs
-
-Positive PRI means the actual move provoked resistance beyond what a neutral reflection would have. The
-simulator is reset to the prefix for every rollout: a replay never continues a contaminated conversation.
-
-  python src/counterfactual.py --dialogues runs/<id>/dialogues/arm.jsonl --backend echo
-"""
 from __future__ import annotations
 
 import argparse

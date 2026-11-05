@@ -1,13 +1,4 @@
-"""Conformal risk control for the critic gate (PLAN Sec. 10.4).
 
-tolerance tau : a turn is a violation when the judge's IP_norm > tau
-score s       : cheap in-pipeline scalar from the Critic (its own IP estimate + grounding violation mass)
-gate          : release when s <= lambda
-risk R(lambda): fraction of calibration turns that would be released at lambda AND are violations
-lambda_hat    : the LARGEST lambda whose upper confidence bound on R satisfies UCB(R) <= alpha
-                (largest, because among safe thresholds the loosest preserves the most utility)
-
-"""
 from __future__ import annotations
 
 import math
@@ -22,7 +13,8 @@ def hoeffding_ucb(r_hat: float, n: int, delta: float) -> float:
     if n <= 0:
         return 1.0
     return min(1.0, r_hat + math.sqrt(math.log(1.0 / delta) / (2.0 * n)))
-
+# <= e^ -2n epsilon ^2 
+# pvalues <= e* bin (n,k,p)
 
 def _binom_cdf(k: int, n: int, p: float) -> float:
     if p <= 0.0:
@@ -148,18 +140,6 @@ def calibrate(scores: Sequence[float], ip_norms: Sequence[float], alpha: float |
         distribution_id=distribution_id, provenance=provenance or {},
     )
 
-
-def empirical_violation_rate(ip_norms: Sequence[float], released: Sequence[bool],
-                             tau: float | None = None) -> dict:
-    tau = float(cfg("conformal.tau", default=0.50) if tau is None else tau)
-    rel = [ip for ip, r in zip(ip_norms, released) if r]
-    if not rel:
-        return {"n_released": 0, "violation_rate": None, "tau": tau}
-    return {
-        "n_released": len(rel),
-        "violation_rate": sum(1 for ip in rel if float(ip) > tau) / len(rel),
-        "tau": tau,
-    }
 
 
 def sweep_alphas(scores: Sequence[float], ip_norms: Sequence[float],

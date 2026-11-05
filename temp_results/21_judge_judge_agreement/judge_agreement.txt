@@ -1,5 +1,5 @@
-Judge-judge agreement: do the headline numbers depend on which open model judges them? (CPU only)
-
+Judge-judge agreement: do the headline numbers depend on which open model judges them?
+ 
 == ip
 arm  n both  Mistral mean  Llama mean  Spearman rho (per item)
 cellA_mono_ungated  1240  0.068  0.363  0.360
